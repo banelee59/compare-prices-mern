@@ -1,7 +1,6 @@
-const mongoose = require('mongoose');
-const dotenv = require('dotenv');
-const colors = require('colors');
-const Product = require('./models/Product');
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
+import Product from './models/Product.js';
 
 dotenv.config();
 
@@ -31,7 +30,7 @@ const sampleProducts = [
 
 const importData = async () => {
     try {
-        await mongoose.connect(process.env.MONGODB_URI);
+        await mongoose.connect(process.env.MONGO_URI);
         
         await Product.deleteMany(); // Clear existing products
         await Product.insertMany(sampleProducts);
@@ -46,7 +45,7 @@ const importData = async () => {
 
 const destroyData = async () => {
     try {
-        await mongoose.connect(process.env.MONGODB_URI);
+        await mongoose.connect(process.env.MONGO_URI);
         
         await Product.deleteMany();
         

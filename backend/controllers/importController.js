@@ -1,7 +1,8 @@
-const { readExcelFile } = require('../utils/excelReader');
-const path = require('path');
+import asyncHandler from 'express-async-handler';
+import { readExcelFile } from '../utils/excelReader';
+import path from 'path';
 
-const importHealthItems = async (req, res) => {
+export const importHealthItems = asyncHandler(async (req, res) => {
     try {
         const excelPath = path.join(__dirname, '../data/Health Items_Request.xlsx');
         const products = await readExcelFile(excelPath);
@@ -17,8 +18,10 @@ const importHealthItems = async (req, res) => {
             error: error.message
         });
     }
+});
+
+const importController = {
+    importHealthItems
 };
 
-module.exports = {
-    importHealthItems
-}; 
+export default importController; 
