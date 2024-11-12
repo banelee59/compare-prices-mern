@@ -1,7 +1,7 @@
-const Product = require('../models/Product');
+import Product from '../models/Product.js';
 
 // Get all products
-const getProducts = async (req, res) => {
+export const getProducts = async (req, res) => {
     try {
         const products = await Product.find();
         res.status(200).json(products);
@@ -11,7 +11,7 @@ const getProducts = async (req, res) => {
 };
 
 // Get products by category
-const getProductsByCategory = async (req, res) => {
+export const getProductsByCategory = async (req, res) => {
     try {
         const products = await Product.find({ category: req.params.category });
         res.status(200).json(products);
@@ -21,7 +21,7 @@ const getProductsByCategory = async (req, res) => {
 };
 
 // Get single product
-const getProduct = async (req, res) => {
+export const getProduct = async (req, res) => {
     try {
         const product = await Product.findById(req.params.id);
         if (!product) {
@@ -34,7 +34,7 @@ const getProduct = async (req, res) => {
 };
 
 // Add sample products
-const addSampleProducts = async (req, res) => {
+export const addSampleProducts = async (req, res) => {
     try {
         const sampleProducts = [
             {
@@ -56,11 +56,4 @@ const addSampleProducts = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-};
-
-module.exports = {
-    getProducts,
-    getProductsByCategory,
-    getProduct,
-    addSampleProducts
 }; 

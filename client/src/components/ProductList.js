@@ -1,24 +1,27 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
+import { useProducts } from '../hooks/useProducts';
 import './ProductList.css';
 
 function ProductList() {
-  const [products, setProducts] = useState([]);
   const { category } = useParams();
+  const { products, loading, error } = useProducts(category);
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get(`http://localhost:5000/api/products/category/${category}`);
-        setProducts(response.data);
-      } catch (error) {
-        console.error('Error fetching products:', error);
-      }
-    };
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-12">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
-    fetchProducts();
-  }, [category]);
+  if (error) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-red-600">Error loading products: {error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="product-list">
@@ -32,7 +35,7 @@ function ProductList() {
               {product.prices.map((price, index) => (
                 <div key={index} className="price-item">
                   <span className="store">{price.store}</span>
-                  <span className="price">${price.price.toFixed(2)}</span>
+                  <span className="price">R{price.price.toFixed(2)}</span>
                 </div>
               ))}
             </div>

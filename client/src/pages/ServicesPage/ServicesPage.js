@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios';
+import { useProducts } from '../../hooks/useProducts';
 
 function ServicesPage() {
     const [selectedCategory, setSelectedCategory] = useState(null);
-    const [healthData, setHealthData] = useState(null);
-    const [loading, setLoading] = useState(false);
+    const { products, loading, error, addSampleProducts } = useProducts(selectedCategory);
 
-    // Organized grocery items by subcategories
+    // Define groceryItems data structure
     const groceryItems = {
         dairy: [
             {
@@ -23,13 +22,6 @@ function ServicesPage() {
                 salePrice: 32.99,
                 store: "Shoprite",
                 brand: "Parmalat"
-            },
-            {
-                name: "Lancewood Cheddar Cheese 400g",
-                originalPrice: 89.99,
-                salePrice: 79.99,
-                store: "Checkers",
-                brand: "Lancewood"
             }
         ],
         bread_bakery: [
@@ -46,13 +38,6 @@ function ServicesPage() {
                 salePrice: 16.99,
                 store: "Pick n Pay",
                 brand: "Sasko"
-            },
-            {
-                name: "Blue Ribbon White Bread 700g",
-                originalPrice: 19.99,
-                salePrice: 17.49,
-                store: "Checkers",
-                brand: "Blue Ribbon"
             }
         ],
         cereals: [
@@ -69,13 +54,6 @@ function ServicesPage() {
                 salePrice: 44.99,
                 store: "Pick n Pay",
                 brand: "Weet-Bix"
-            },
-            {
-                name: "Kellogg's Corn Flakes 750g",
-                originalPrice: 54.99,
-                salePrice: 49.99,
-                store: "Shoprite",
-                brand: "Kellogg's"
             }
         ],
         beverages: [
@@ -92,13 +70,6 @@ function ServicesPage() {
                 salePrice: 19.99,
                 store: "Shoprite",
                 brand: "Fanta"
-            },
-            {
-                name: "Sprite 2L",
-                originalPrice: 23.99,
-                salePrice: 20.99,
-                store: "Checkers",
-                brand: "Sprite"
             }
         ],
         pantry: [
@@ -115,28 +86,16 @@ function ServicesPage() {
                 salePrice: 49.99,
                 store: "Pick n Pay",
                 brand: "Ace"
-            },
-            {
-                name: "White Star Super Maize Meal 5kg",
-                originalPrice: 55.99,
-                salePrice: 50.99,
-                store: "Checkers",
-                brand: "White Star"
             }
         ]
     };
 
-    // Add this grouped items constant
+    // Define groupedItems data structure
     const groupedItems = {
         groceries: {
             title: "Groceries",
             icon: "🛒",
-            items: groceryItems.dairy.concat(
-                groceryItems.bread_bakery,
-                groceryItems.cereals,
-                groceryItems.beverages,
-                groceryItems.pantry
-            )
+            items: Object.values(groceryItems).flat()
         },
         electronics: {
             title: "Electronics",
@@ -149,13 +108,19 @@ function ServicesPage() {
                     store: "Game",
                     brand: "Samsung"
                 },
-                // Add more electronics items
+                {
+                    name: "JBL Bluetooth Speaker",
+                    originalPrice: 1299.99,
+                    salePrice: 999.99,
+                    store: "Makro",
+                    brand: "JBL"
+                }
             ]
         },
         health: {
             title: "Health & Beauty",
             icon: "💊",
-            items: healthData || []
+            items: []
         },
         home: {
             title: "Home & Garden",
@@ -168,7 +133,13 @@ function ServicesPage() {
                     store: "Builders",
                     brand: "Home & Co"
                 },
-                // Add more home items
+                {
+                    name: "Bosch Power Drill",
+                    originalPrice: 899.99,
+                    salePrice: 749.99,
+                    store: "Makro",
+                    brand: "Bosch"
+                }
             ]
         }
     };
@@ -254,17 +225,10 @@ function ServicesPage() {
 
     const importAndShowHealthData = async () => {
         try {
-            setLoading(true);
-            const response = await axios.post('http://localhost:5000/api/products/import-health');
-            
-            if (response.data.success) {
-                const healthResponse = await axios.get('http://localhost:5000/api/products/category/health');
-                setHealthData(healthResponse.data);
-            }
+            await addSampleProducts();
+            setSelectedCategory('health');
         } catch (error) {
             console.error('Error:', error);
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -277,6 +241,30 @@ function ServicesPage() {
         if (section) {
             section.scrollIntoView({ behavior: 'smooth' });
         }
+    };
+
+    const renderCategoryProducts = () => {
+        if (loading) {
+            return (
+                <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
+                </div>
+            );
+        }
+
+        if (error) {
+            return (
+                <div className="text-center py-12">
+                    <p className="text-red-600">Error loading products: {error}</p>
+                </div>
+            );
+        }
+
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {products.map(product => renderProductCard(product))}
+            </div>
+        );
     };
 
     return (
@@ -348,9 +336,7 @@ function ServicesPage() {
                         )}
 
                         {selectedCategory === 'health' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {(healthData || []).map(product => renderProductCard(product))}
-                            </div>
+                            renderCategoryProducts()
                         )}
 
                         {selectedCategory === 'home' && (
