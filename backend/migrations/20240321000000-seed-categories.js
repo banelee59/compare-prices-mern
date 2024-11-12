@@ -1,47 +1,49 @@
+import { ObjectId } from 'mongodb';
+
 export const up = async (db) => {
   const categories = [
     {
       name: 'Groceries',
       iconName: 'shopping-cart',
       subcategories: [
-        { name: 'Fresh Produce' },
-        { name: 'Dairy & Eggs' },
-        { name: 'Meat & Seafood' },
-        { name: 'Bakery' },
-        { name: 'Breakfast & Cereals' }
+        { _id: new ObjectId(), name: 'Fresh Produce' },
+        { _id: new ObjectId(), name: 'Dairy & Eggs' },
+        { _id: new ObjectId(), name: 'Meat & Seafood' },
+        { _id: new ObjectId(), name: 'Bakery' },
+        { _id: new ObjectId(), name: 'Breakfast & Cereals' }
       ]
     },
     {
       name: 'Electronics',
       iconName: 'smartphone',
       subcategories: [
-        { name: 'Smartphones' },
-        { name: 'Laptops & Computers' },
-        { name: 'TV & Audio' },
-        { name: 'Gaming' },
-        { name: 'Accessories' }
+        { _id: new ObjectId(), name: 'Smartphones' },
+        { _id: new ObjectId(), name: 'Laptops & Computers' },
+        { _id: new ObjectId(), name: 'TV & Audio' },
+        { _id: new ObjectId(), name: 'Gaming' },
+        { _id: new ObjectId(), name: 'Accessories' }
       ]
     },
     {
       name: 'Home & Garden',
       iconName: 'home',
       subcategories: [
-        { name: 'Furniture' },
-        { name: 'Garden & Outdoor' },
-        { name: 'Kitchen & Dining' },
-        { name: 'Home Decor' },
-        { name: 'Storage & Organization' }
+        { _id: new ObjectId(), name: 'Furniture' },
+        { _id: new ObjectId(), name: 'Garden & Outdoor' },
+        { _id: new ObjectId(), name: 'Kitchen & Dining' },
+        { _id: new ObjectId(), name: 'Home Decor' },
+        { _id: new ObjectId(), name: 'Storage & Organization' }
       ]
     },
     {
       name: 'Health & Beauty',
       iconName: 'heart',
       subcategories: [
-        { name: 'Skincare' },
-        { name: 'Hair Care' },
-        { name: 'Makeup' },
-        { name: 'Personal Care' },
-        { name: 'Vitamins & Supplements' }
+        { _id: new ObjectId(), name: 'Skincare' },
+        { _id: new ObjectId(), name: 'Hair Care' },
+        { _id: new ObjectId(), name: 'Makeup' },
+        { _id: new ObjectId(), name: 'Personal Care' },
+        { _id: new ObjectId(), name: 'Vitamins & Supplements' }
       ]
     }
   ];

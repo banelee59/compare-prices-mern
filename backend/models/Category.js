@@ -6,7 +6,7 @@ const subcategorySchema = new mongoose.Schema({
     required: true,
     trim: true
   }
-});
+}, { _id: true });
 
 const categorySchema = new mongoose.Schema({
   name: {
@@ -22,6 +22,10 @@ const categorySchema = new mongoose.Schema({
   },
   subcategories: [subcategorySchema]
 });
+
+// Add indexes for better query performance
+categorySchema.index({ name: 1 });
+categorySchema.index({ 'subcategories.name': 1 });
 
 const Category = mongoose.model('Category', categorySchema);
 

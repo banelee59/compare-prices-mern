@@ -1,168 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { useProducts } from '../../hooks/useProducts';
+//import { useProducts } from '../../hooks/useProducts.js';
+//import { useCategory } from '../../hooks/useCategory.js';
+import useProducts from '../../hooks/useProducts.js';
+import useCategory from '../../hooks/useCategory.js';
+import * as LucideIcons from 'lucide-react';
 
 function ServicesPage() {
     const [selectedCategory, setSelectedCategory] = useState(null);
-    const { products, loading, error, addSampleProducts } = useProducts(selectedCategory);
+    const { products, loading: productsLoading, error: productsError } = useProducts(selectedCategory);
+    const { categories, loading: categoriesLoading, error: categoriesError } = useCategory();
 
-    // Define groceryItems data structure
-    const groceryItems = {
-        dairy: [
-            {
-                name: "Clover Full Cream Milk 2L",
-                originalPrice: 36.99,
-                salePrice: 31.99,
-                store: "Pick n Pay",
-                brand: "Clover"
-            },
-            {
-                name: "Parmalat Low Fat Milk 2L",
-                originalPrice: 34.99,
-                salePrice: 32.99,
-                store: "Shoprite",
-                brand: "Parmalat"
-            }
-        ],
-        bread_bakery: [
-            {
-                name: "Albany Superior White Bread 700g",
-                originalPrice: 19.99,
-                salePrice: 17.99,
-                store: "Shoprite",
-                brand: "Albany"
-            },
-            {
-                name: "Sasko Brown Bread 700g",
-                originalPrice: 18.99,
-                salePrice: 16.99,
-                store: "Pick n Pay",
-                brand: "Sasko"
-            }
-        ],
-        cereals: [
-            {
-                name: "Jungle Oats Original 1kg",
-                originalPrice: 45.99,
-                salePrice: 39.99,
-                store: "Checkers",
-                brand: "Jungle"
-            },
-            {
-                name: "Weet-Bix Original 900g",
-                originalPrice: 49.99,
-                salePrice: 44.99,
-                store: "Pick n Pay",
-                brand: "Weet-Bix"
-            }
-        ],
-        beverages: [
-            {
-                name: "Coca-Cola 2L",
-                originalPrice: 24.99,
-                salePrice: 21.99,
-                store: "Pick n Pay",
-                brand: "Coca-Cola"
-            },
-            {
-                name: "Fanta Orange 2L",
-                originalPrice: 22.99,
-                salePrice: 19.99,
-                store: "Shoprite",
-                brand: "Fanta"
-            }
-        ],
-        pantry: [
-            {
-                name: "Tastic Rice 2kg",
-                originalPrice: 49.99,
-                salePrice: 45.99,
-                store: "Shoprite",
-                brand: "Tastic"
-            },
-            {
-                name: "Ace Super Maize Meal 5kg",
-                originalPrice: 54.99,
-                salePrice: 49.99,
-                store: "Pick n Pay",
-                brand: "Ace"
-            }
-        ]
-    };
+    // Transform categories and products into grouped structure
+    const groupedItems = useMemo(() => {
+        if (!categories || !products) return {};
 
-    // Define groupedItems data structure
-    const groupedItems = {
-        groceries: {
-            title: "Groceries",
-            icon: "🛒",
-            items: Object.values(groceryItems).flat()
-        },
-        electronics: {
-            title: "Electronics",
-            icon: "📱",
-            items: [
-                {
-                    name: "Samsung 55\" Smart TV",
-                    originalPrice: 9999.99,
-                    salePrice: 8499.99,
-                    store: "Game",
-                    brand: "Samsung"
-                },
-                {
-                    name: "JBL Bluetooth Speaker",
-                    originalPrice: 1299.99,
-                    salePrice: 999.99,
-                    store: "Makro",
-                    brand: "JBL"
-                }
-            ]
-        },
-        health: {
-            title: "Health & Beauty",
-            icon: "💊",
-            items: []
-        },
-        home: {
-            title: "Home & Garden",
-            icon: "🏡",
-            items: [
-                {
-                    name: "Garden Chair Set",
-                    originalPrice: 1999.99,
-                    salePrice: 1499.99,
-                    store: "Builders",
-                    brand: "Home & Co"
-                },
-                {
-                    name: "Bosch Power Drill",
-                    originalPrice: 899.99,
-                    salePrice: 749.99,
-                    store: "Makro",
-                    brand: "Bosch"
-                }
-            ]
-        }
-    };
+        return categories.reduce((acc, category) => {
+            // Debug logs to check the icon name and component
+            console.log("Category:", category.name);
+            console.log("Icon name:", category.iconName);
+            console.log("Available icons:", Object.keys(LucideIcons));
+            
+            // Make sure the icon name matches exactly with Lucide component names
+            // Convert first letter to uppercase and remove any spaces or special characters
+            const formattedIconName = category.iconName
+                ?.split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join('');
+            
+            console.log("Formatted icon name:", formattedIconName);
+            console.log("Icon exists:", !!LucideIcons[formattedIconName]);
+
+            const IconComponent = formattedIconName && LucideIcons[formattedIconName];
+            
+            acc[category.name.toLowerCase()] = {
+                title: category.name,
+                icon: IconComponent ? <IconComponent size={20} /> : <LucideIcons.ShoppingCart size={20} />,
+                items: products.filter(product => 
+                    product.category.toLowerCase() === category.name.toLowerCase()
+                ),
+                subcategories: category.subcategories || []
+            };
+            return acc;
+        }, {});
+    }, [categories, products]);
 
     // Render subcategory section
-    const renderGrocerySubcategory = (title, items) => (
-        <div className="mb-8">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">{title}</h3>
+    const renderSubcategory = (subcategory, items) => (
+        <div className="mb-8" key={subcategory.name}>
+            <h3 className="text-xl font-semibold text-gray-800 mb-4">{subcategory.name}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {items.map(product => renderProductCard({
-                    ...product,
-                    category: 'groceries'
-                }))}
+                {items.map(product => renderProductCard(product))}
             </div>
         </div>
     );
 
-    // Update the renderProductCard to include brand
+    // Update the renderProductCard to handle the new product structure
     const renderProductCard = (product) => {
-        const savings = product.originalPrice - product.salePrice;
+        const latestPrice = product.prices[0]; // Assuming prices are sorted by date
+        const previousPrice = product.prices[1];
+        const savings = previousPrice ? previousPrice.price - latestPrice.price : 0;
 
         return (
-            <div key={product.name} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+            <div key={product._id} className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden">
                 <div className="relative p-4">
                     {/* Product Image Placeholder */}
                     <div className="bg-gray-100 rounded-lg h-48 flex items-center justify-center mb-4">
@@ -178,16 +78,18 @@ function ServicesPage() {
                     )}
 
                     {/* Brand Badge */}
-                    <div className="absolute top-6 left-6">
-                        <div className="bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm font-medium">
-                            {product.brand}
+                    {product.brand && (
+                        <div className="absolute top-6 left-6">
+                            <div className="bg-primary-100 text-primary-800 px-3 py-1 rounded-full text-sm font-medium">
+                                {product.brand}
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     {/* Store Badge */}
                     <div className="absolute top-16 left-6">
                         <div className="bg-white px-3 py-1 rounded-full text-sm font-medium text-gray-700 shadow-md">
-                            {product.store}
+                            {latestPrice.store}
                         </div>
                     </div>
 
@@ -198,11 +100,11 @@ function ServicesPage() {
 
                         <div className="flex items-baseline gap-2">
                             <span className="text-2xl font-bold text-primary-600">
-                                R{product.salePrice.toFixed(2)}
+                                R{latestPrice.price.toFixed(2)}
                             </span>
-                            {savings > 0 && (
+                            {previousPrice && (
                                 <span className="text-sm text-gray-500 line-through">
-                                    R{product.originalPrice.toFixed(2)}
+                                    R{previousPrice.price.toFixed(2)}
                                 </span>
                             )}
                         </div>
@@ -223,15 +125,6 @@ function ServicesPage() {
         );
     };
 
-    const importAndShowHealthData = async () => {
-        try {
-            await addSampleProducts();
-            setSelectedCategory('health');
-        } catch (error) {
-            console.error('Error:', error);
-        }
-    };
-
     // Add this function after your existing state declarations
     const showCategoryContent = (categoryKey) => {
         setSelectedCategory(categoryKey);
@@ -243,29 +136,23 @@ function ServicesPage() {
         }
     };
 
-    const renderCategoryProducts = () => {
-        if (loading) {
-            return (
-                <div className="flex justify-center items-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
-                </div>
-            );
-        }
-
-        if (error) {
-            return (
-                <div className="text-center py-12">
-                    <p className="text-red-600">Error loading products: {error}</p>
-                </div>
-            );
-        }
-
+    if (categoriesLoading || productsLoading) {
         return (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {products.map(product => renderProductCard(product))}
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
             </div>
         );
-    };
+    }
+
+    if (categoriesError || productsError) {
+        return (
+            <div className="text-center py-12">
+                <p className="text-red-600">
+                    Error loading content: {categoriesError || productsError}
+                </p>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -301,7 +188,7 @@ function ServicesPage() {
                 </div>
 
                 {/* Display content based on selected category */}
-                {selectedCategory && (
+                {selectedCategory && groupedItems[selectedCategory] && (
                     <section id={`${selectedCategory}-section`} className="mb-12">
                         <div className="flex justify-between items-center mb-6">
                             <h2 className="text-2xl font-bold text-gray-900 capitalize flex items-center gap-2">
@@ -318,30 +205,17 @@ function ServicesPage() {
                             </Link>
                         </div>
 
-                        {/* Render content based on category */}
-                        {selectedCategory === 'groceries' && (
-                            <>
-                                {renderGrocerySubcategory('Dairy & Eggs', groceryItems.dairy)}
-                                {renderGrocerySubcategory('Bread & Bakery', groceryItems.bread_bakery)}
-                                {renderGrocerySubcategory('Breakfast & Cereals', groceryItems.cereals)}
-                                {renderGrocerySubcategory('Beverages', groceryItems.beverages)}
-                                {renderGrocerySubcategory('Pantry Essentials', groceryItems.pantry)}
-                            </>
-                        )}
-
-                        {selectedCategory === 'electronics' && (
+                        {/* Render subcategories if they exist */}
+                        {groupedItems[selectedCategory].subcategories.length > 0 ? (
+                            groupedItems[selectedCategory].subcategories.map(subcategory => {
+                                const subcategoryItems = groupedItems[selectedCategory].items.filter(
+                                    item => item.subcategory === subcategory.name
+                                );
+                                return renderSubcategory(subcategory, subcategoryItems);
+                            })
+                        ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {groupedItems.electronics.items.map(product => renderProductCard(product))}
-                            </div>
-                        )}
-
-                        {selectedCategory === 'health' && (
-                            renderCategoryProducts()
-                        )}
-
-                        {selectedCategory === 'home' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                                {groupedItems.home.items.map(product => renderProductCard(product))}
+                                {groupedItems[selectedCategory].items.map(product => renderProductCard(product))}
                             </div>
                         )}
                     </section>

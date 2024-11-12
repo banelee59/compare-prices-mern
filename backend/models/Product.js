@@ -6,15 +6,24 @@ const productSchema = new mongoose.Schema({
         required: true
     },
     category: {
-        type: String,
-        required: true,
-        enum: ['groceries', 'electronics', 'fashion', 'home', 'health', 'dairy', 'bread_bakery', 'cereals', 'beverages', 'pantry']
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+        required: true
+    },
+    subcategory: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Subcategory',
+        required: false
     },
     brand: {
         type: String,
         required: false
     },
     description: String,
+    imageUrl: {
+        type: String,
+        required: false
+    },
     prices: [{
         store: {
             type: String,
@@ -28,11 +37,12 @@ const productSchema = new mongoose.Schema({
             type: Date,
             default: Date.now
         }
-    }],
-    subcategory: {
-        type: String,
-        required: false
-    }
+    }]
+}, {
+    timestamps: true  // This will add createdAt and updatedAt fields automatically
 });
+
+// Add an index to improve query performance
+productSchema.index({ category: 1, subcategory: 1 });
 
 export default mongoose.model('Product', productSchema); 
