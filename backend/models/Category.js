@@ -15,6 +15,11 @@ const categorySchema = new mongoose.Schema({
     unique: true,
     trim: true
   },
+  iconName: {
+    type: String,
+    required: true,
+    trim: true
+  },
   subcategories: [subcategorySchema]
 });
 

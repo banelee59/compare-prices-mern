@@ -2,6 +2,7 @@ export const up = async (db) => {
   const categories = [
     {
       name: 'Groceries',
+      iconName: 'shopping-cart',
       subcategories: [
         { name: 'Fresh Produce' },
         { name: 'Dairy & Eggs' },
@@ -12,6 +13,7 @@ export const up = async (db) => {
     },
     {
       name: 'Electronics',
+      iconName: 'smartphone',
       subcategories: [
         { name: 'Smartphones' },
         { name: 'Laptops & Computers' },
@@ -22,6 +24,7 @@ export const up = async (db) => {
     },
     {
       name: 'Home & Garden',
+      iconName: 'home',
       subcategories: [
         { name: 'Furniture' },
         { name: 'Garden & Outdoor' },
@@ -32,6 +35,7 @@ export const up = async (db) => {
     },
     {
       name: 'Health & Beauty',
+      iconName: 'heart',
       subcategories: [
         { name: 'Skincare' },
         { name: 'Hair Care' },
