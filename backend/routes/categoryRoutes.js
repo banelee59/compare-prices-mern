@@ -4,10 +4,13 @@ import {
   getCategory,
   createCategory,
   updateCategory,
-  deleteCategory
+  deleteCategory,
+  getCategoriesWithProducts
 } from '../controllers/categoryController.js';
 
 const router = express.Router();
+
+router.get('/with-products', getCategoriesWithProducts);
 
 router.route('/')
   .get(getCategories)

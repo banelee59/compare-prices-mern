@@ -23,11 +23,17 @@ const useCategory = (categoryId) => {
       } catch (err) {
         setError('Failed to fetch categories. Please try again later.');
         setLoading(false);
+      } finally {
+        console.log('Categories fetched:', categories);
       }
-    };
+    }
 
     fetchCategories();
   }, [categoryId]);
+
+  useEffect(() => {
+    console.log('Categories:', categories);
+  }, [categories]);
 
   // CRUD operations
   const createCategory = async (categoryData) => {

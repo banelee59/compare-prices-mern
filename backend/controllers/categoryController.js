@@ -1,5 +1,46 @@
 import Category from '../models/Category.js';
 import asyncHandler from 'express-async-handler';
+import Product from '../models/Product.js';
+
+export const getCategoriesWithProducts = async (req, res) => {
+  try {
+    const categories = await Category.aggregate([
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: 'category',
+          as: 'products'
+        }
+      },
+      {
+        $lookup: {
+          from: 'products',
+          localField: '_id',
+          foreignField: 'subcategory',
+          as: 'subcategoryProducts'
+        }
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          iconName: 1,
+          subcategories: 1,
+          products: 1,
+          subcategoryProducts: 1
+        }
+      }
+    ]);
+
+    res.status(200).json(categories);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
 
 // Get all categories
 export const getCategories = asyncHandler(async (req, res) => {
