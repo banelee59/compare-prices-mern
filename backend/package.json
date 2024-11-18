@@ -7,7 +7,8 @@
     "dev": "nodemon server.js",
     "migrate:status": "migrate-mongo status",
     "migrate:up": "migrate-mongo up",
-    "migrate:down": "migrate-mongo down"
+    "migrate:down": "migrate-mongo down",
+    "import:health-items": "node scripts/generateProductMigration.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
