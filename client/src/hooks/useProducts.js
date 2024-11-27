@@ -1,44 +1,47 @@
 import { useState, useEffect } from 'react';
 import axiosInstance from '../config/axios';
 
-const useProducts = ({ category, subcategory }) => {
+export const useProducts = (page = 1) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [paginationData, setPaginationData] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalProducts: 0,
+    productsPerPage: 50
+  });
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        let url = '/products';
-        const params = new URLSearchParams();
+        setLoading(true);
+        const response = await axiosInstance.get(`/api/products?page=${page}`);
         
-        if (category) {
-          params.append('category', category);
-        }
-        if (subcategory) {
-          params.append('subcategory', subcategory);
-        }
-
-        const queryString = params.toString();
-        if (queryString) {
-          url += `?${queryString}`;
-        }
-
-        const response = await axiosInstance.get(url);
-        setProducts(response.data);
-        setLoading(false);
+        setProducts(response.data.products);
+        setPaginationData({
+          currentPage: response.data.currentPage,
+          totalPages: response.data.totalPages,
+          totalProducts: response.data.totalProducts,
+          productsPerPage: response.data.productsPerPage
+        });
+        setError(null);
       } catch (err) {
-        setError('Failed to fetch products. Please try again later.');
-        setLoading(false);
+        setError(err.message);
       } finally {
-        console.log('Products fetched:', products);
-      } 
+        setLoading(false);
+      }
     };
 
     fetchProducts();
-  }, [category, subcategory]);
+  }, [page]);
 
-  return { products, loading, error };
+  return { 
+    products, 
+    loading, 
+    error, 
+    pagination: paginationData,
+    hasNextPage: paginationData.currentPage < paginationData.totalPages,
+    hasPreviousPage: paginationData.currentPage > 1
+  };
 };
-
-export default useProducts;

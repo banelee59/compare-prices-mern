@@ -2,6 +2,7 @@ import xlsx from 'xlsx';
 import path from 'path';
 import { promises as fs } from 'fs';
 import { connectDB } from '../config/db.js';
+import { paginateResults } from '../utils/pagination.js';
 
 async function generateProductMigration() {
     let db;
@@ -34,41 +35,39 @@ async function generateProductMigration() {
             updatedAt: new Date()
         }));
 
-        // Test database connection by inserting a test document
-        await db.collection('products').insertOne({ test: true });
-        await db.collection('products').deleteOne({ test: true });
-
-        // Create migration content
-        const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
-        const migrationContent = `
-import { connectDB } from '../config/db.js';
-
+        // Create paginated migrations
+        const totalPages = Math.ceil(products.length / 50);
+        
+        for (let page = 1; page <= totalPages; page++) {
+            const paginatedData = paginateResults(products, page, 50);
+            
+            const timestamp = new Date().toISOString().split('T')[0].replace(/-/g, '');
+            const migrationContent = `
 export const up = async (db) => {
-    const products = ${JSON.stringify(products, null, 2)};
+    const products = ${JSON.stringify(paginatedData.items, null, 2)};
     
     // Insert products
     await db.collection('products').insertMany(products);
     
-    console.log('Imported ${products.length} products');
+    console.log('Imported ${paginatedData.items.length} products (Page ${page}/${totalPages})');
 };
 
 export const down = async (db) => {
-    // Remove the imported products
-    await db.collection('products').deleteMany({});
+    // Remove the imported products from this batch
+    const productNames = ${JSON.stringify(paginatedData.items.map(p => p.name))};
+    await db.collection('products').deleteMany({ name: { $in: productNames } });
     
-    console.log('Removed imported products');
-};
-`;
+    console.log('Removed products from page ${page}');
+};`;
 
-        // Write migration file
-        const migrationFileName = `${timestamp}-import-health-items.js`;
-        const migrationPath = path.join(process.cwd(), 'migrations', migrationFileName);
+            const migrationFileName = `${timestamp}-import-health-items-page-${page}.js`;
+            const migrationPath = path.join(process.cwd(), 'migrations', migrationFileName);
+            
+            await fs.writeFile(migrationPath, migrationContent);
+            console.log(`Created migration for page ${page}: ${migrationFileName}`);
+        }
         
-        await fs.writeFile(migrationPath, migrationContent);
-        
-        console.log(`Created migration: ${migrationFileName}`);
-        console.log(`Imported ${products.length} products`);
-        
+        console.log(`Created ${totalPages} migration files`);
         process.exit(0);
     } catch (error) {
         console.error('Migration generation failed:', error);

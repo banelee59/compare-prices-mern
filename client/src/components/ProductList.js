@@ -1,49 +1,50 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState } from 'react';
 import { useProducts } from '../hooks/useProducts';
-import './ProductList.css';
+import Pagination from './Pagination';
 
-function ProductList() {
-  const { category } = useParams();
-  const { products, loading, error } = useProducts(category);
+const ProductList = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const { products, loading, error, pagination } = useProducts(currentPage);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-red-600">Error loading products: {error}</p>
-      </div>
-    );
-  }
+  if (loading) return <div>Loading products...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="product-list">
-      <h2>{category} Products</h2>
-      <div className="products-grid">
+    <div className="container mx-auto px-4">
+      <h2 className="text-2xl font-bold mb-4">Products</h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {products.map((product) => (
-          <div key={product._id} className="product-card">
-            <img src={product.imageUrl} alt={product.name} />
-            <h3>{product.name}</h3>
-            <div className="prices">
+          <div key={product._id} className="border rounded-lg p-4 shadow">
+            <img 
+              src={product.imageUrl} 
+              alt={product.name}
+              className="w-full h-48 object-cover rounded-md"
+            />
+            <h3 className="text-lg font-semibold mt-2">{product.name}</h3>
+            <p className="text-gray-600">{product.brand}</p>
+            <p className="text-sm mt-2">{product.description}</p>
+            <div className="mt-4">
               {product.prices.map((price, index) => (
-                <div key={index} className="price-item">
-                  <span className="store">{price.store}</span>
-                  <span className="price">R{price.price.toFixed(2)}</span>
+                <div key={index} className="flex justify-between">
+                  <span>{price.store}</span>
+                  <span className="font-bold">R {price.price.toFixed(2)}</span>
                 </div>
               ))}
             </div>
           </div>
         ))}
       </div>
+
+      {pagination && (
+        <Pagination 
+          currentPage={currentPage}
+          totalPages={pagination.totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
     </div>
   );
-}
+};
 
 export default ProductList;
