@@ -22,6 +22,9 @@ connectDB();
 // Routes
 app.use('/api/categories', categoryRoutes);
 app.use('/api/products', productRoutes);
+app.get('/', (req, res) => {
+  res.send('Hi from the backend!!');
+});
 
 const PORT = process.env.PORT || 5000;
 

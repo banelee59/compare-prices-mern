@@ -36,4 +36,4 @@ async function importProductsFromXLSX(xlsxFilePath) {
   await mongoose.disconnect();
 }
 
-importProductsFromXLSX('products.xlsx');
+importProductsFromXLSX('product.xlsx');
